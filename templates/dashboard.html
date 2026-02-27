@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Logistics Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            background-color: #f4f6f9;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: #1f2937;
+            color: white;
+            height: 100vh;
+            padding-top: 20px;
+            position: fixed;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: white;
+            padding: 15px 20px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background: #374151;
+        }
+
+        /* Main Content */
+        .main {
+            margin-left: 250px;
+            padding: 30px;
+            width: 100%;
+        }
+
+        .navbar {
+            background: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .cards {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            flex: 1;
+            border-radius: 8px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            margin: 0;
+            color: #1f2937;
+        }
+
+        .card p {
+            font-size: 24px;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .logout {
+            color: red;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>AI Extract</h2>
+        <a href="#">Dashboard</a>
+        <a href="/upload">Upload Document</a>
+        <a href="/uploaded">Previous Uploads</a>
+        <a href="#">Profile</a>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <div class="main">
+        <div class="navbar">
+            <div>Welcome, {{ username }}</div>
+            <div>AI-Based Text Extraction System</div>
+        </div>
+
+        <h1>Dashboard Overview</h1>
+
+        <div class="cards">
+            <div class="card">
+                <h3>Total Documents</h3>
+                <p>0</p>
+            </div>
+
+            <div class="card">
+                <h3>Processed Today</h3>
+                <p>0</p>
+            </div>
+
+            <div class="card">
+                <h3>Extraction Accuracy</h3>
+                <p>--%</p>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
