@@ -1,1 +1,8 @@
 /venv
+/database.lock
+/database1.err
+/database2.err
+/database1.out
+/database2.out
+/database3.err
+/database3.out
