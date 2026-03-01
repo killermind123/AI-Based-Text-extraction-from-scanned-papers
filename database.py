@@ -33,12 +33,26 @@ def init_db():
     
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS documents (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        filename TEXT,
-        upload_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id)
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            file_name TEXT NOT NULL,
+            file_path TEXT NOT NULL,
+            upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            status TEXT DEFAULT 'uploaded',
+            extracted_text TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id)
     )
+""")
+    
+    cursor.execute("""
+            CREATE TABLE extracted_fields (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            document_id INTEGER,
+            field_name TEXT,
+            field_value TEXT,
+            confidence REAL,
+            FOREIGN KEY (document_id) REFERENCES documents(id)
+)
 """)
 
 

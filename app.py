@@ -115,8 +115,8 @@ def upload_document():
 
     if user:
         cursor.execute(
-            "INSERT INTO documents (user_id, filename) VALUES (?, ?)",
-            (user["id"], filename)
+            "INSERT INTO documents (user_id, file_name, file_path, status) VALUES (?, ?, ?, ?)",
+            (user["id"], filename, filepath, 'uploaded')
         )
         conn.commit()
 
@@ -134,7 +134,7 @@ def uploaded_page():
 
     cursor.execute("SELECT * FROM documents ")
     user = cursor.fetchone()
-    return render_template("uploaded.html", name=user["filename"])
+    return render_template("uploaded.html")
 
 
 if __name__ == "__main__":
