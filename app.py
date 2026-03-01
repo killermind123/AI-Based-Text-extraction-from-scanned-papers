@@ -83,6 +83,7 @@ def upload_page():
 #upload Post-route
 @app.route("/upload", methods=["POST"])
 def upload_document():
+    
     if "user" not in session:
         return redirect("/login")
 
@@ -90,6 +91,7 @@ def upload_document():
         return "No file uploaded"
 
     file = request.files["file"]
+    print(file)
 
     if file.filename == "":
         return "No selected file"
@@ -126,7 +128,13 @@ def upload_document():
 def uploaded_page():
     if "user" not in session:
         return redirect("/login")
-    return render_template("uploaded.html")
+    
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM documents ")
+    user = cursor.fetchone()
+    return render_template("uploaded.html", name=user["filename"])
 
 
 if __name__ == "__main__":
