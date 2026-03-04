@@ -3,8 +3,187 @@
 <head>
     <title>Sign Up - AI Document Extraction</title>
     <link rel="stylesheet" href="../static/style.css">
+    <style>
+        /* ----------------------------------------------------------
+   Global Styles
+---------------------------------------------------------- */
+
+:root {
+    --bg: #f7f7f8;
+    --bg-card: #ffffff;
+    --text: #1a1a1a;
+    --text-light: #6b6b6b;
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --border: #e5e7eb;
+    --radius: 10px;
+    --shadow: 0 4px 12px rgba(0,0,0,0.06);
+    --transition: 0.25s ease;
+    --font: "Inter", system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #0f0f10;
+        --bg-card: #1a1a1c;
+        --text: #f5f5f5;
+        --text-light: #a1a1a1;
+        --primary: #6366f1;
+        --primary-hover: #818cf8;
+        --border: #2a2a2d;
+        --shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: var(--font);
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* ----------------------------------------------------------
+   Utility Classes
+---------------------------------------------------------- */
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-center { justify-content: center; align-items: center; }
+
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 12px; }
+.mt-4 { margin-top: 16px; }
+.mt-5 { margin-top: 24px; }
+
+.p-1 { padding: 4px; }
+.p-2 { padding: 8px; }
+.p-3 { padding: 12px; }
+.p-4 { padding: 16px; }
+.p-5 { padding: 24px; }
+
+/* ----------------------------------------------------------
+   Card
+---------------------------------------------------------- */
+
+.card {
+    background: var(--bg-card);
+    padding: 40px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+    border: 1px solid var(--border);
+    animation: fadeIn 0.4s ease;
+}
+
+.card h2 {
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+/* ----------------------------------------------------------
+   Forms
+---------------------------------------------------------- */
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+input {
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    transition: var(--transition);
+    font-size: 15px;
+}
+
+input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+}
+
+/* ----------------------------------------------------------
+   Buttons
+---------------------------------------------------------- */
+
+button {
+    padding: 12px;
+    border-radius: var(--radius);
+    border: none;
+    background: var(--primary);
+    color: white;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+button:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* ----------------------------------------------------------
+   Links
+---------------------------------------------------------- */
+
+a {
+    display: inline-block;
+    margin-top: 16px;
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+
+/* ----------------------------------------------------------
+   Animations
+---------------------------------------------------------- */
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+    </style>
 </head>
 <body>
+
+    
 
 <div class="card">
     <h2>Create Account</h2>

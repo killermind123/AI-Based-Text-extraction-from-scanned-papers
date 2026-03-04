@@ -2,22 +2,223 @@
 <html>
 <head>
     <title>Upload Document</title>
+    <style>
+        /* =========================================
+   EXTENDED STYLES – UPLOAD + DASHBOARD
+   (Unified With Previous System Styling)
+========================================= */
+
+/* =========================
+   LAYOUT (Sidebar + Main)
+========================= */
+
+body {
+    background: #f4f6fb;
+    display: flex;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+    color: #111827;
+}
+
+.sidebar {
+    width: 240px;
+    background: #0f172a;
+    color: white;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sidebar h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: #cbd5e1;
+    padding: 10px 14px;
+    border-radius: 8px;
+    transition: 0.2s ease;
+    font-size: 14px;
+}
+
+.sidebar a:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+}
+
+.main {
+    flex: 1;
+    padding: 40px;
+}
+
+/* =========================
+   NAVBAR
+========================= */
+
+.navbar {
+    background: white;
+    padding: 16px 24px;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    font-weight: 500;
+}
+
+/* =========================
+   UPLOAD SECTION
+========================= */
+
+.upload-container {
+    display: flex;
+    justify-content: center;
+}
+
+.upload-card {
+    width: 420px;
+    text-align: center;
+}
+
+/* Card (Reusable) */
+
+.card {
+    background: white;
+    padding: 30px;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+}
+
+.upload-card h2 {
+    margin-bottom: 20px;
+}
+
+/* =========================
+   FILE INPUT
+========================= */
+
+.upload-card input[type="file"] {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    margin-bottom: 16px;
+    cursor: pointer;
+}
+
+.upload-card input[type="file"]:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+/* =========================
+   BUTTON
+========================= */
+
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+button:hover {
+    background: #1e40af;
+}
+
+/* =========================
+   BACK LINK
+========================= */
+
+.upload-card a {
+    display: inline-block;
+    margin-top: 18px;
+    font-size: 14px;
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.upload-card a:hover {
+    text-decoration: underline;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
+
+    body {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 15px;
+    }
+
+    .main {
+        padding: 20px;
+    }
+
+    .navbar {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .upload-card {
+        width: 100%;
+    }
+}
+    </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="card">
-        <h2>Upload Scanned Document</h2>
-
-        <form action="/upload" method="POST" enctype="multipart/form-data">
-            <input type="file" name="file" required>
-            <br>
-            <button type="submit">Upload</button>
-        </form>
-
-        <a href="/">Back to Dashboard</a>
+    <div class="sidebar">
+        <h2>AI Extract</h2>
+        <a href="/">Dashboard</a>
+        <a href="/upload">Upload Document</a>
+        <a href="/uploaded">Previous Uploads</a>
+        <a href="#">Profile</a>
+        <a href="/logout">Logout</a>
     </div>
-</div>
+
+    <div class="main">
+        <div class="navbar">
+            <div>Upload Center</div>
+            <div>AI-Based Text Extraction System</div>
+        </div>
+
+        <div class="upload-container">
+            <div class="card upload-card">
+                <h2>Upload Scanned Document</h2>
+
+                <form action="/upload" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="file" required>
+                    <button type="submit">Upload</button>
+                </form>
+
+                <a href="/">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>

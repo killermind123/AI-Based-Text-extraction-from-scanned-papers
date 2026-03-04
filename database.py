@@ -20,6 +20,8 @@ def init_db():
     conn = get_connection()
     cursor = conn.cursor()
 
+    cursor.execute("DROP TABLE IF EXISTS documents")
+
     
 
     # Users Table
@@ -35,11 +37,25 @@ def init_db():
     CREATE TABLE IF NOT EXISTS documents (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER,
-        filename TEXT,
+        file_name TEXT,
+        file_path TEXT,
         upload_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        status TEXT DEFAULT 'uploaded',
+        extracted_text TEXT,
         FOREIGN KEY (user_id) REFERENCES users(id)
     )
 """)
+    
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS extracted_fields (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        document_id INTEGER,
+        field_name TEXT,
+        field_value TEXT,
+        confidence REAL,
+        FOREIGN KEY (document_id) REFERENCES documents(id)
+    )
+    """)
 
 
     conn.commit()

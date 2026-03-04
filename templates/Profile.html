@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <style>
+        /* ===============================
+   PROFILE PAGE
+================================= */
+
+.profile-container {
+    display: flex;
+    justify-content: center;
+}
+
+.profile-card {
+    width: 500px;
+    background: white;
+    padding: 40px;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.profile-card h2 {
+    margin-bottom: 20px;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+    font-size: 15px;
+    color: #374151;
+}
+
+.profile-card hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 20px 0;
+}
+
+.profile-card h3 {
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+/* Profile Form */
+
+.profile-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.profile-card input {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    transition: 0.2s;
+}
+
+.profile-card input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.profile-card button {
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.profile-card button:hover {
+    background: #1e40af;
+}
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>AI Extract</h2>
+    <a href="/">Dashboard</a>
+    <a href="/upload">Upload Document</a>
+    <a href="/uploaded">Previous Uploads</a>
+    <a href="/profile">Profile</a>
+    <a href="/logout">Logout</a>
+</div>
+
+<div class="main">
+
+    <div class="navbar">
+        <div>Profile Settings</div>
+        <div>AI-Based Text Extraction System</div>
+    </div>
+
+    <div class="profile-container">
+
+        <div class="profile-card">
+
+            <h2>Your Profile</h2>
+
+            <div class="profile-info">
+                <p><strong>Username:</strong> {{ username }}</p>
+                <p><strong>Email:</strong> {{ email }}</p>
+                <p><strong>Account Created:</strong> {{ created_at }}</p>
+            </div>
+
+            <hr>
+
+            <h3>Edit Profile</h3>
+
+            <form method="POST">
+                <input type="text" name="username" placeholder="New Username">
+                <input type="password" name="password" placeholder="New Password">
+                <button type="submit">Update Profile</button>
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
