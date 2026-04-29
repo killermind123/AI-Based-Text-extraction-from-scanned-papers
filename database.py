@@ -9,22 +9,10 @@ def get_connection():
     return conn
 
 def init_db():
-
-    try:
-        if os.path.exists(DATABASE_NAME):
-            os.remove(DATABASE_NAME)
-    except PermissionError:
-        print("Database file is in use. Skipping deletion.")
-
-
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("DROP TABLE IF EXISTS documents")
-
-    
-
-    # Users Table
+    # Users table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,31 +20,46 @@ def init_db():
             password TEXT NOT NULL
         )
     """)
-    
+
+    # Documents table
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS documents (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        file_name TEXT,
-        file_path TEXT,
-        upload_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        status TEXT DEFAULT 'uploaded',
-        extracted_text TEXT,
-        FOREIGN KEY (user_id) REFERENCES users(id)
-    )
-""")
-    
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS extracted_fields (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        document_id INTEGER,
-        field_name TEXT,
-        field_value TEXT,
-        confidence REAL,
-        FOREIGN KEY (document_id) REFERENCES documents(id)
-    )
+        CREATE TABLE IF NOT EXISTS documents (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            file_name TEXT NOT NULL,
+            file_path TEXT NOT NULL,
+            upload_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            processed_time TIMESTAMP,
+            processing_status TEXT DEFAULT 'uploaded',
+            document_type TEXT,
+            extracted_text TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
     """)
 
+    # Extracted fields table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS extracted_fields (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            document_id INTEGER NOT NULL,
+            field_name TEXT NOT NULL,
+            field_value TEXT,
+            confidence REAL,
+            FOREIGN KEY (document_id) REFERENCES documents(id)
+        )
+    """)
+
+    # Indexes for faster queries
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_documents_user 
+        ON documents(user_id)
+    """)
+
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_fields_document 
+        ON extracted_fields(document_id)
+    """)
 
     conn.commit()
     conn.close()
+    print("Database initialised successfully")
