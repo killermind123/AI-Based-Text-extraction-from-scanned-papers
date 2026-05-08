@@ -1,87 +1,67 @@
 import pytesseract
 import cv2
-import numpy as np
-from PIL import Image
 import os
 
-# Tesseract path — Windows
+# Windows Tesseract path
 pytesseract.pytesseract.tesseract_cmd = r"C:\Users\S22247228\Downloads\tesseract.exe"
 
-def extract_text_tesseract(image_path):
+
+def extract_text(image_path, method="tesseract"):
     """
-    Baseline OCR using Tesseract.
-    Used for dissertation comparison.
-    Returns raw text string.
+    OCR using Tesseract.
+    Returns words, bounding boxes and confidences.
     """
     img = cv2.imread(image_path)
+
+    if img is None:
+        raise ValueError(f"Could not load image: {image_path}")
+
+    height, width = img.shape[:2]
     config = r'--oem 3 --psm 6'
-    text = pytesseract.image_to_string(img, config=config)
-    return text.strip()
 
+    # Get detailed OCR data including bounding boxes
+    data = pytesseract.image_to_data(
+        img,
+        config=config,
+        output_type=pytesseract.Output.DICT
+    )
 
-def extract_text_paddle(image_path):
-    """
-    Improved OCR using PaddleOCR.
-    Returns list of (word, bbox, confidence) tuples.
-    """
-    try:
-        from paddleocr import PaddleOCR
+    words = []
+    boxes = []
+    confidences = []
 
-        ocr = PaddleOCR(use_angle_cls=True, lang='en', show_log=False)
-        result = ocr.ocr(image_path, cls=True)
+    for i, word in enumerate(data['text']):
+        # Skip empty words
+        if word.strip() == '':
+            continue
 
-        words = []
-        boxes = []
-        confidences = []
+        conf = float(data['conf'][i])
 
-        for line in result[0]:
-            box = line[0]        # bounding box [[x1,y1],[x2,y1],[x2,y2],[x1,y2]]
-            word = line[1][0]    # text
-            conf = line[1][1]    # confidence score
+        # Skip very low confidence
+        if conf < 0:
+            continue
 
-            # Convert box to [x_min, y_min, x_max, y_max]
-            x_coords = [p[0] for p in box]
-            y_coords = [p[1] for p in box]
-            bbox = [min(x_coords), min(y_coords),
-                    max(x_coords), max(y_coords)]
+        x = data['left'][i]
+        y = data['top'][i]
+        w = data['width'][i]
+        h = data['height'][i]
 
+        # Only add if box has valid dimensions
+        if w > 0 and h > 0:
             words.append(word)
-            boxes.append(bbox)
-            confidences.append(conf)
+            boxes.append([x, y, x + w, y + h])
+            confidences.append(conf / 100.0)
 
-        return {
-            "words": words,
-            "boxes": boxes,
-            "confidences": confidences,
-            "raw_text": " ".join(words)
-        }
+    print(f"OCR found {len(words)} words with {len(boxes)} boxes")
 
-    except ImportError:
-        print("PaddleOCR not installed — falling back to Tesseract")
-        text = extract_text_tesseract(image_path)
-        return {
-            "words": text.split(),
-            "boxes": [],
-            "confidences": [],
-            "raw_text": text
-        }
-
-
-def extract_text(image_path, method="paddle"):
-    """
-    Main entry point for OCR.
-    method: 'paddle' (default) or 'tesseract' (baseline)
-    """
-    if method == "tesseract":
-        text = extract_text_tesseract(image_path)
-        return {
-            "words": text.split(),
-            "boxes": [],
-            "confidences": [],
-            "raw_text": text
-        }
-    else:
-        return extract_text_paddle(image_path)
+    return {
+        "words": words,
+        "boxes": boxes,
+        "confidences": confidences,
+        "raw_text": " ".join(words),
+        "image_width": width,
+        "image_height": height
+    }
 
 
 def normalize_boxes(boxes, image_width, image_height):
@@ -91,9 +71,9 @@ def normalize_boxes(boxes, image_width, image_height):
     normalized = []
     for box in boxes:
         normalized.append([
-            int(1000 * box[0] / image_width),
-            int(1000 * box[1] / image_height),
-            int(1000 * box[2] / image_width),
-            int(1000 * box[3] / image_height),
+            max(0, min(1000, int(1000 * box[0] / image_width))),
+            max(0, min(1000, int(1000 * box[1] / image_height))),
+            max(0, min(1000, int(1000 * box[2] / image_width))),
+            max(0, min(1000, int(1000 * box[3] / image_height))),
         ])
     return normalized

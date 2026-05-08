@@ -6,3 +6,7 @@
 /database2.out
 /database3.err
 /database3.out
+# Model files — too large for GitHub
+/ml_pipeline/models/
+*.safetensors
+*.zip
