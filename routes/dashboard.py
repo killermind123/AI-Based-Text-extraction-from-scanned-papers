@@ -10,7 +10,7 @@ import re
 dashboard_bp = Blueprint("dashboard", __name__)
 
 #dashboard route
-@dashboard_bp.route("/")
+@dashboard_bp.route("/dashboard")
 def dashboard():
     if "user" not in session:
         return redirect("/login")

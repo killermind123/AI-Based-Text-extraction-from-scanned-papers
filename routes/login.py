@@ -28,7 +28,7 @@ def login():
 
         if user and check_password_hash(user["password"], password):
             session["user"] = username
-            return redirect("/")
+            return redirect("/dashboard")
         else:
             return "Invalid Credentials"
 

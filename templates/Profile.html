@@ -1,132 +1,450 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Profile</title>
-    <link rel="stylesheet" href="../static/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile — AI Extract</title>
     <style>
-        /* ===============================
-   PROFILE PAGE
-================================= */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-.profile-container {
-    display: flex;
-    justify-content: center;
-}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+            background: #f0f2f5;
+            color: #1a1a2e;
+            min-height: 100vh;
+        }
 
-.profile-card {
-    width: 500px;
-    background: white;
-    padding: 40px;
-    border-radius: 18px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
-}
+        /* ── TOP NAV ── */
+        .topnav {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        }
+        .topnav .brand {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: -0.5px;
+        }
+        .topnav .brand span { color: #4f8ef7; }
+        .topnav-links { display: flex; gap: 8px; }
+        .topnav-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        .topnav-links a:hover { background: rgba(255,255,255,0.08); color: white; }
+        .topnav-links a.active { background: rgba(79,142,247,0.2); color: #4f8ef7; }
 
-.profile-card h2 {
-    margin-bottom: 20px;
-}
+        /* ── MAIN LAYOUT ── */
+        .page {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 24px;
+        }
 
-.profile-info {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
-    font-size: 15px;
-    color: #374151;
-}
+        /* ── CARDS ── */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06),
+                        0 4px 16px rgba(0,0,0,0.04);
+        }
 
-.profile-card hr {
-    border: none;
-    border-top: 1px solid #e5e7eb;
-    margin: 20px 0;
-}
+        /* ── PROFILE CARD ── */
+        .profile-card { text-align: center; }
+        .avatar {
+            width: 88px;
+            height: 88px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f8ef7, #a855f7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: 700;
+            color: white;
+            margin: 0 auto 16px;
+        }
+        .profile-card h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .profile-card .email {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .joined {
+            font-size: 12px;
+            color: #94a3b8;
+            background: #f8fafc;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
 
-.profile-card h3 {
-    margin-bottom: 15px;
-    font-size: 18px;
-}
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .stat {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 14px 8px;
+            text-align: center;
+        }
+        .stat .number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        .stat .number.green { color: #10b981; }
+        .stat .number.red { color: #ef4444; }
+        .stat .label {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-/* Profile Form */
+        /* ── EDIT FORM ── */
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #1a1a2e;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #1a1a2e;
+            transition: 0.2s;
+            background: #fafafa;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #4f8ef7;
+            background: white;
+        }
+        .divider {
+            border: none;
+            border-top: 1px dashed #e2e8f0;
+            margin: 20px 0;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #4f8ef7, #6366f1);
+            color: white;
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
 
-.profile-card form {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
+        /* Alerts */
+        .alert {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
 
-.profile-card input {
-    padding: 12px;
-    border-radius: 10px;
-    border: 1px solid #e5e7eb;
-    background: #f9fafb;
-    transition: 0.2s;
-}
+        /* ── RIGHT COLUMN ── */
+        .right-col { display: flex; flex-direction: column; gap: 24px; }
 
-.profile-card input:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-}
+        /* Document list */
+        .doc-table { width: 100%; border-collapse: collapse; }
+        .doc-table th {
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0 12px 12px;
+        }
+        .doc-table td {
+            padding: 12px;
+            border-top: 1px solid #f1f5f9;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+        .doc-table tr:hover td { background: #f8fafc; }
 
-.profile-card button {
-    padding: 12px;
-    border-radius: 10px;
-    border: none;
-    background: #2563eb;
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-}
+        .doc-name {
+            font-weight: 500;
+            color: #1a1a2e;
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .doc-type {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
 
-.profile-card button:hover {
-    background: #1e40af;
-}
+        .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-processed { background: #d1fae5; color: #065f46; }
+        .badge-failed { background: #fee2e2; color: #991b1b; }
+        .badge-processing { background: #fef3c7; color: #92400e; }
+
+        .view-btn {
+            padding: 5px 12px;
+            background: #eff6ff;
+            color: #3b82f6;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .view-btn:hover { background: #dbeafe; }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+        }
+        .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+
+        @media (max-width: 768px) {
+            .page { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <h2>AI Extract</h2>
-    <a href="/">Dashboard</a>
-    <a href="/upload">Upload Document</a>
-    <a href="/uploaded">Previous Uploads</a>
-    <a href="/profile">Profile</a>
-    <a href="/logout">Logout</a>
-</div>
-
-<div class="main">
-
-    <div class="navbar">
-        <div>Profile Settings</div>
-        <div>AI-Based Text Extraction System</div>
+<!-- Top Nav -->
+<nav class="topnav">
+    <div class="brand">AI<span>Extract</span></div>
+    <div class="topnav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/upload">Upload</a>
+        <a href="/profile" class="active">Profile</a>
+        <a href="/logout">Logout</a>
     </div>
+</nav>
 
-    <div class="profile-container">
+<div class="page">
 
-        <div class="profile-card">
+    <!-- LEFT COLUMN -->
+    <div class="left-col">
 
-            <h2>Your Profile</h2>
-
-            <div class="profile-info">
-                <p><strong>Username:</strong> {{ username }}</p>
-                <p><strong>Email:</strong> {{ email }}</p>
-                <p><strong>Account Created:</strong> {{ created_at }}</p>
+        <!-- Profile Card -->
+        <div class="card profile-card">
+            <div class="avatar">
+                {{ user['username'][0].upper() }}
+            </div>
+            <h2>{{ user['username'] }}</h2>
+            <p class="email">{{ user['email'] or 'No email set' }}</p>
+            <div class="joined">
+                Joined {{ user['created_at'][:10] if user['created_at'] else 'Unknown' }}
             </div>
 
-            <hr>
-
-            <h3>Edit Profile</h3>
-
-            <form method="POST">
-                <input type="text" name="username" placeholder="New Username">
-                <input type="password" name="password" placeholder="New Password">
-                <button type="submit">Update Profile</button>
-            </form>
-
+            <!-- Stats -->
+            <div class="stats">
+                <div class="stat">
+                    <div class="number">{{ total_docs }}</div>
+                    <div class="label">Total</div>
+                </div>
+                <div class="stat">
+                    <div class="number green">{{ processed_docs }}</div>
+                    <div class="label">Done</div>
+                </div>
+                <div class="stat">
+                    <div class="number red">{{ failed_docs }}</div>
+                    <div class="label">Failed</div>
+                </div>
+            </div>
         </div>
 
+        <!-- Edit Form -->
+        <div class="card">
+            <div class="section-title">Edit Profile</div>
+
+            <!-- Success messages -->
+            {% if success %}
+                {% for msg in success %}
+                <div class="alert alert-success">✓ {{ msg }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Error messages -->
+            {% if errors %}
+                {% for err in errors %}
+                <div class="alert alert-error">✗ {{ err }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form action="/profile/update" method="POST">
+
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username"
+                           value="{{ user['username'] }}"
+                           placeholder="Enter new username">
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email"
+                           value="{{ user['email'] or '' }}"
+                           placeholder="Enter your email">
+                </div>
+
+                <hr class="divider">
+                <div class="section-title" style="margin-top:4px">
+                    Change Password
+                </div>
+
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" name="current_password"
+                           placeholder="Enter current password">
+                </div>
+
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" name="new_password"
+                           placeholder="Enter new password">
+                </div>
+
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" name="confirm_password"
+                           placeholder="Confirm new password">
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Save Changes
+                </button>
+            </form>
+        </div>
     </div>
 
+    <!-- RIGHT COLUMN -->
+    <div class="right-col">
+        <div class="card">
+            <div class="section-title">
+                My Documents
+                <span style="color:#94a3b8; font-weight:400; font-size:13px">
+                    — {{ total_docs }} total
+                </span>
+            </div>
+
+            {% if documents %}
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Document</th>
+                        <th>Type</th>
+                        <th>Fields</th>
+                        <th>Status</th>
+                        <th>Uploaded</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documents %}
+                    <tr>
+                        <td>
+                            <div class="doc-name">{{ doc['file_name'] }}</div>
+                        </td>
+                        <td>
+                            <span class="doc-type">
+                                {{ doc['document_type'] or 'unknown' }}
+                            </span>
+                        </td>
+                        <td style="color:#64748b">
+                            {{ doc['field_count'] }} fields
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ doc['processing_status'] }}">
+                                {{ doc['processing_status'] }}
+                            </span>
+                        </td>
+                        <td style="color:#94a3b8; font-size:13px">
+                            {{ doc['upload_time'][:10] if doc['upload_time'] else '—' }}
+                        </td>
+                        <td>
+                            <a href="/uploaded/{{ doc['id'] }}"
+                               class="view-btn">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% else %}
+            <div class="empty-state">
+                <div class="icon">📄</div>
+                <p>No documents uploaded yet</p>
+                <a href="/upload" style="color:#4f8ef7; font-size:14px">
+                    Upload your first document
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 
 </body>

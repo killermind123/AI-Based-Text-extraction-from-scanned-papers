@@ -7,9 +7,10 @@ from PIL import Image
 import os
 import re
 
-logout_bp = Blueprint("logout", __name__)
+home_bp = Blueprint("home", __name__)
 
-@logout_bp.route("/logout")
-def logout():
-    session.pop("user", None)
-    return redirect("/")
+#dashboard route
+@home_bp.route("/", methods=["GET"])
+def home_page():
+    
+    return render_template("landing.html")

@@ -5,6 +5,8 @@ from routes.dashboard import dashboard_bp
 from routes.login import login_bp
 from routes.logout import logout_bp
 from routes.upload import upload_bp
+from routes.profile import profile_bp
+from routes.home import home_bp
 import pytesseract
 import os
 
@@ -19,10 +21,12 @@ pytesseract.pytesseract.tesseract_cmd = r"C:\Users\S22247228\Downloads\tesseract
 
 # Register blueprints
 app.register_blueprint(dashboard_bp)
+app.register_blueprint(home_bp)
 app.register_blueprint(signup_bp)
 app.register_blueprint(login_bp)
 app.register_blueprint(logout_bp)
 app.register_blueprint(upload_bp)
+app.register_blueprint(profile_bp)
 
 if __name__ == "__main__":
     app.run(debug=True)
