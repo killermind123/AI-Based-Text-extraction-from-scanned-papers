@@ -3,195 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Extraction Results</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #f5f5f5;
-        }
-        .container {
-            background: white;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 15px;
-        }
-        .status-badge {
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: bold;
-        }
-        .status-processed { background: #d4edda; color: #155724; }
-        .status-failed    { background: #f8d7da; color: #721c24; }
-        .status-processing{ background: #fff3cd; color: #856404; }
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-top: 20px;
-        }
-        .document-image img {
-            width: 100%;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-        }
-        .fields-section h3 {
-            margin-bottom: 15px;
-            color: #333;
-        }
-        .field-card {
-            background: #f8f9fa;
-            border-left: 4px solid #007bff;
-            border-radius: 4px;
-            padding: 12px 15px;
-            margin-bottom: 10px;
-        }
-        .field-name {
-            font-size: 11px;
-            text-transform: uppercase;
-            color: #888;
-            margin-bottom: 4px;
-        }
-        .field-value {
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-        }
-        .confidence {
-            font-size: 11px;
-            color: #888;
-            margin-top: 4px;
-        }
-        .confidence-bar {
-            height: 4px;
-            background: #e9ecef;
-            border-radius: 2px;
-            margin-top: 4px;
-        }
-        .confidence-fill {
-            height: 100%;
-            background: #28a745;
-            border-radius: 2px;
-        }
-        .no-fields {
-            color: #888;
-            font-style: italic;
-            padding: 20px;
-            text-align: center;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        .actions {
-            margin-top: 30px;
-            display: flex;
-            gap: 10px;
-        }
-        .btn {
-            padding: 10px 20px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            text-decoration: none;
-        }
-        .btn-primary { background: #007bff; color: white; }
-        .btn-secondary { background: #6c757d; color: white; }
-        .raw-text {
-            margin-top: 30px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-        }
-        .raw-text pre {
-            white-space: pre-wrap;
-            font-size: 12px;
-            color: #555;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        @media (max-width: 600px) {
-            .content-grid { grid-template-columns: 1fr; }
-        }
-    </style>
+    <title>Results — AI Extract</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-<div class="container">
+<body class="bg-gray-50 min-h-screen font-sans">
+
+<!-- Navbar -->
+<nav class="bg-gray-900 px-8 py-4 flex items-center justify-between sticky top-0 z-50">
+    <a href="/" class="text-xl font-bold text-white tracking-tight">
+        AI<span class="text-indigo-400">Extract</span>
+    </a>
+    <div class="flex items-center gap-2">
+        <a href="/" class="text-sm text-gray-400 hover:text-white px-4 py-2 rounded-lg hover:bg-white/10 transition">Dashboard</a>
+        <a href="/upload" class="text-sm text-gray-400 hover:text-white px-4 py-2 rounded-lg hover:bg-white/10 transition">Upload</a>
+        <a href="/profile" class="text-sm text-gray-400 hover:text-white px-4 py-2 rounded-lg hover:bg-white/10 transition">Profile</a>
+        <a href="/logout" class="text-sm text-red-400 hover:text-red-300 px-4 py-2 rounded-lg hover:bg-white/10 transition">Logout</a>
+    </div>
+</nav>
+
+{% set field_labels = {
+    'total.total_price': 'Total Amount',
+    'sub_total.subtotal_price': 'Subtotal',
+    'sub_total.tax_price': 'Tax',
+    'sub_total.service_price': 'Service Charge',
+    'total.cashprice': 'Cash Paid',
+    'total.changeprice': 'Change',
+    'menu.nm': 'Item Name',
+    'menu.price': 'Item Price',
+    'menu.cnt': 'Quantity',
+    'header': 'Document Header',
+    'question': 'Field Label',
+    'answer': 'Field Value',
+    'total': 'Total',
+    'date': 'Date',
+    'address': 'Address',
+    'order_id': 'Order ID',
+    'invoice': 'Invoice Number',
+    'signature': 'Signature'
+} %}
+
+{% set field_icons = {
+    'total.total_price': '💰',
+    'sub_total.subtotal_price': '🧾',
+    'sub_total.tax_price': '📊',
+    'sub_total.service_price': '🔧',
+    'total.cashprice': '💵',
+    'total.changeprice': '🪙',
+    'menu.nm': '🍽️',
+    'menu.price': '💲',
+    'menu.cnt': '🔢',
+    'header': '📋',
+    'question': '❓',
+    'answer': '✅',
+    'total': '💰',
+    'date': '📅',
+    'address': '📍',
+    'order_id': '🔖',
+    'invoice': '📄',
+    'signature': '✍️'
+} %}
+
+<div class="max-w-6xl mx-auto px-8 py-10">
 
     <!-- Header -->
-    <div class="header">
+    <div class="flex items-start justify-between mb-8">
         <div>
-            <h2>Extraction Results</h2>
-            <p style="color:#888; margin:0">{{ document['file_name'] }}</p>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">
+                Extraction Results
+            </h1>
+            <p class="text-gray-500 mt-1 text-sm">
+                {{ document['file_name'] }}
+                {% if document['document_type'] %}
+                ·
+                <span class="capitalize font-medium text-gray-600">
+                    {{ document['document_type'] }}
+                </span>
+                {% endif %}
+                · Uploaded {{ document['upload_time'][:10] if document['upload_time'] else '' }}
+            </p>
         </div>
-        <span class="status-badge status-{{ document['processing_status'] }}">
-            {{ document['processing_status'].upper() }}
+        {% if document['processing_status'] == 'processed' %}
+        <span class="bg-emerald-50 text-emerald-700 text-xs font-semibold px-4 py-2 rounded-full border border-emerald-100">
+            ✓ Processed
         </span>
+        {% elif document['processing_status'] == 'failed' %}
+        <span class="bg-red-50 text-red-700 text-xs font-semibold px-4 py-2 rounded-full border border-red-100">
+            ✗ Failed
+        </span>
+        {% else %}
+        <span class="bg-amber-50 text-amber-700 text-xs font-semibold px-4 py-2 rounded-full border border-amber-100">
+            ⏳ Processing
+        </span>
+        {% endif %}
     </div>
 
-    <!-- Main content -->
-    <div class="content-grid">
+    <!-- Main grid -->
+    <div class="grid grid-cols-2 gap-6 mb-6">
 
-        <!-- Left: Document image -->
-        <div class="document-image">
-            <h3>Uploaded Document</h3>
-            <img src="/uploads/{{ document['file_name'] }}" 
-                alt="Uploaded document"
-                    onerror="this.style.display='none'">
+        <!-- Document image -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-6">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                Uploaded Document
+            </p>
+            <img src="/uploads/{{ document['file_name'] }}"
+                 alt="Uploaded document"
+                 class="w-full rounded-xl border border-gray-100 shadow-sm"
+                 onerror="this.parentElement.innerHTML+='<div class=\'w-full h-48 bg-gray-50 rounded-xl border border-dashed border-gray-200 flex items-center justify-center text-gray-400 text-sm mt-2\'>Image preview not available</div>'; this.remove();">
         </div>
 
-        <!-- Right: Extracted fields -->
-        <div class="fields-section">
-            <h3>Extracted Fields</h3>
+        <!-- Extracted fields -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Extracted Fields
+                </p>
+                <span class="text-xs text-gray-400">
+                    {{ fields|length }} field{{ 's' if fields|length != 1 else '' }} found
+                </span>
+            </div>
 
             {% if fields %}
+            <div class="space-y-3 max-h-96 overflow-y-auto pr-1">
                 {% for field in fields %}
-                <div class="field-card">
-                    <div class="field-name">{{ field['field_name'] }}</div>
-                    <div class="field-value">{{ field['field_value'] }}</div>
-                    <div class="confidence">
-                        Confidence: {{ "%.0f"|format(field['confidence'] * 100) }}%
+                {% set conf = field['confidence'] * 100 %}
+                {% set fname = field['field_name'].lower() %}
+                {% set display_name = field_labels.get(fname, field['field_name'].replace('_', ' ').replace('.', ' ').title()) %}
+                {% set icon = field_icons.get(fname, '📌') %}
+
+                <div class="bg-gray-50 rounded-xl p-4 border-l-4
+                    {% if conf >= 80 %}border-indigo-500
+                    {% elif conf >= 60 %}border-amber-400
+                    {% else %}border-red-400{% endif %}">
+
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-sm">{{ icon }}</span>
+                        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                            {{ display_name }}
+                        </span>
                     </div>
-                    <div class="confidence-bar">
-                        <div class="confidence-fill" 
-                             style="width: {{ "%.0f"|format(field['confidence'] * 100) }}%">
+
+                    <p class="text-lg font-bold text-gray-900 mb-2">
+                        {{ field['field_value'] }}
+                    </p>
+
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1 h-1.5 bg-gray-200 rounded-full">
+                            <div class="h-full rounded-full
+                                {% if conf >= 80 %}bg-indigo-500
+                                {% elif conf >= 60 %}bg-amber-400
+                                {% else %}bg-red-400{% endif %}"
+                                 style="width: {{ '%.0f'|format(conf) }}%">
+                            </div>
                         </div>
+                        <span class="text-xs font-medium
+                            {% if conf >= 80 %}text-indigo-600
+                            {% elif conf >= 60 %}text-amber-600
+                            {% else %}text-red-600{% endif %}
+                            min-w-max">
+                            {{ '%.0f'|format(conf) }}% confidence
+                        </span>
                     </div>
                 </div>
                 {% endfor %}
+            </div>
+
             {% else %}
-                <div class="no-fields">
-                    No fields could be extracted from this document.
-                </div>
+            <div class="text-center py-12">
+                <p class="text-4xl mb-3">🔍</p>
+                <p class="text-gray-600 font-medium">No fields extracted</p>
+                <p class="text-gray-400 text-sm mt-1">
+                    Try uploading a clearer image
+                </p>
+                <a href="/upload"
+                   class="inline-block mt-4 bg-indigo-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+                    Upload another
+                </a>
+            </div>
             {% endif %}
         </div>
     </div>
 
+    <!-- Stats row -->
+    {% if fields %}
+    <div class="grid grid-cols-3 gap-4 mb-6">
+        {% set high_conf = fields | selectattr('confidence', 'ge', 0.8) | list %}
+        {% set med_conf = fields | selectattr('confidence', 'ge', 0.6) | selectattr('confidence', 'lt', 0.8) | list %}
+        {% set low_conf = fields | selectattr('confidence', 'lt', 0.6) | list %}
+
+        <div class="bg-white rounded-2xl border border-gray-100 p-5 text-center">
+            <p class="text-2xl font-bold text-indigo-600">{{ high_conf|length }}</p>
+            <p class="text-xs text-gray-400 mt-1 uppercase tracking-wider">High confidence</p>
+            <p class="text-xs text-gray-300 mt-0.5">≥ 80%</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-100 p-5 text-center">
+            <p class="text-2xl font-bold text-amber-500">{{ med_conf|length }}</p>
+            <p class="text-xs text-gray-400 mt-1 uppercase tracking-wider">Medium confidence</p>
+            <p class="text-xs text-gray-300 mt-0.5">60% — 79%</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-100 p-5 text-center">
+            <p class="text-2xl font-bold text-red-500">{{ low_conf|length }}</p>
+            <p class="text-xs text-gray-400 mt-1 uppercase tracking-wider">Low confidence</p>
+            <p class="text-xs text-gray-300 mt-0.5">Below 60%</p>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Raw OCR text -->
     {% if document['extracted_text'] %}
-    <div class="raw-text">
-        <h4>Raw OCR Text</h4>
-        <pre>{{ document['extracted_text'] }}</pre>
+    <div class="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Raw OCR Text
+            </p>
+            <button onclick="document.getElementById('ocr-text').classList.toggle('hidden')"
+                    class="text-xs text-indigo-600 hover:text-indigo-800 font-medium transition">
+                Toggle
+            </button>
+        </div>
+        <div id="ocr-text">
+            <pre class="text-xs text-gray-500 whitespace-pre-wrap font-mono leading-relaxed max-h-48 overflow-y-auto bg-gray-50 rounded-xl p-4">{{ document['extracted_text'] }}</pre>
+        </div>
     </div>
     {% endif %}
 
     <!-- Actions -->
-    <div class="actions">
-        <a href="/" class="btn btn-primary">Back to Dashboard</a>
-        <a href="/upload" class="btn btn-secondary">Upload Another</a>
+    <div class="flex gap-3 flex-wrap">
+        <a href="/dashboard"
+           class="bg-gray-900 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-gray-700 transition">
+            Back to dashboard
+        </a>
+        <a href="/upload"
+           class="bg-white text-gray-700 px-6 py-3 rounded-xl text-sm font-semibold border border-gray-200 hover:bg-gray-50 transition">
+            Upload another
+        </a>
+        {% if fields %}
+        <button onclick="downloadJSON()"
+                class="bg-indigo-600 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition">
+            Download JSON
+        </button>
+        {% endif %}
     </div>
-
 </div>
+
+<script>
+function downloadJSON() {
+    const fields = [
+        {% for field in fields %}
+        {
+            "field": "{{ field['field_name'] }}",
+            "value": "{{ field['field_value'] }}",
+            "confidence": {{ field['confidence'] }}
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    const data = {
+        "document": "{{ document['file_name'] }}",
+        "type": "{{ document['document_type'] or 'unknown' }}",
+        "status": "{{ document['processing_status'] }}",
+        "uploaded": "{{ document['upload_time'] }}",
+        "extracted_fields": fields
+    };
+
+    const blob = new Blob(
+        [JSON.stringify(data, null, 2)],
+        { type: "application/json" }
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "extraction_{{ document['id'] }}.json";
+    a.click();
+    URL.revokeObjectURL(url);
+}
+</script>
+
 </body>
 </html>

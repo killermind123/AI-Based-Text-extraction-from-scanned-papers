@@ -85,24 +85,30 @@ def is_valid_total(value):
 
 
 def postprocess_fields(fields):
-    """
-    Clean and validate all extracted fields.
-    """
     cleaned = {}
 
     for field_name, field_value in fields.items():
 
-        if field_name in ["total", "subtotal", "tax", "amount"]:
+        # Total fields
+        if any(x in field_name.lower() for x in ["total", "subtotal", "cash", "change"]):
             val = clean_currency(field_value)
             if val and is_valid_total(val):
                 cleaned[field_name] = val
 
-        elif field_name in ["date", "invoice_date", "due_date"]:
-            val = clean_date(field_value)
+        # Tax and service
+        elif any(x in field_name.lower() for x in ["tax", "service"]):
+            val = clean_currency(field_value)
             if val:
                 cleaned[field_name] = val
 
-        elif field_name in ["address", "signature"]:
+        # Menu items
+        elif "menu" in field_name.lower():
+            val = clean_text(field_value)
+            if val:
+                cleaned[field_name] = val
+
+        # Form fields
+        elif any(x in field_name.lower() for x in ["header", "question", "answer"]):
             val = clean_text(field_value)
             if val:
                 cleaned[field_name] = val
@@ -112,7 +118,5 @@ def postprocess_fields(fields):
             if val:
                 cleaned[field_name] = val
 
-    # Remove None values
     cleaned = {k: v for k, v in cleaned.items() if v is not None}
-
     return cleaned

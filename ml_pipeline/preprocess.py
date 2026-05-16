@@ -1,39 +1,38 @@
 import cv2
 import numpy as np
-from PIL import Image
 import os
 
 def preprocess_image(filepath):
     """
-    Clean and enhance scanned document image before OCR.
-    Steps: grayscale → denoise → deskew → binarize
-    Returns path to processed image
+    Clean image before OCR.
+    Uses adaptive thresholding for better results on clean receipts.
     """
-
     img = cv2.imread(filepath)
 
     if img is None:
         raise ValueError(f"Could not load image from {filepath}")
 
-    # Step 1 — Convert to grayscale
+    # Convert to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    # Step 2 — Denoise
+    # Denoise
     denoised = cv2.fastNlMeansDenoising(gray, h=10)
 
-    # Step 3 — Deskew (straighten tilted scans)
+    # Deskew
     deskewed = deskew(denoised)
 
-    # Step 4 — Increase contrast
-    contrasted = cv2.convertScaleAbs(deskewed, alpha=1.5, beta=0)
-
-    # Step 5 — Binarize (black and white)
-    _, binary = cv2.threshold(
-        contrasted, 0, 255,
-        cv2.THRESH_BINARY + cv2.THRESH_OTSU
+    # Use adaptive threshold instead of global
+    # Works much better for receipts with varying lighting
+    binary = cv2.adaptiveThreshold(
+        deskewed,
+        255,
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY,
+        11,
+        2
     )
 
-    # Save processed image to temp file
+    # Save processed image
     processed_path = filepath.replace(".", "_processed.")
     cv2.imwrite(processed_path, binary)
 
@@ -41,17 +40,12 @@ def preprocess_image(filepath):
 
 
 def deskew(image):
-    """
-    Straighten a tilted/rotated scanned document.
-    Uses image moments to calculate skew angle.
-    """
-    # Find all non-zero pixels
+    """Straighten tilted scanned documents."""
     coords = np.column_stack(np.where(image > 0))
 
     if len(coords) == 0:
         return image
 
-    # Calculate the angle
     angle = cv2.minAreaRect(coords)[-1]
 
     if angle < -45:
@@ -59,11 +53,9 @@ def deskew(image):
     else:
         angle = -angle
 
-    # Only deskew if angle is significant
     if abs(angle) < 0.5:
         return image
 
-    # Rotate the image
     (h, w) = image.shape[:2]
     center = (w // 2, h // 2)
     rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
@@ -77,21 +69,14 @@ def deskew(image):
 
 
 def preprocess_pdf(filepath):
-    """
-    Convert PDF to images then preprocess each page.
-    Returns list of processed image paths.
-    """
+    """Convert PDF pages to images then preprocess."""
     from pdf2image import convert_from_path
-
     pages = convert_from_path(filepath, dpi=300)
     processed_paths = []
 
     for i, page in enumerate(pages):
-        # Save each page as image
         page_path = filepath.replace(".pdf", f"_page_{i}.png")
         page.save(page_path, "PNG")
-
-        # Preprocess the page
         processed_path = preprocess_image(page_path)
         processed_paths.append(processed_path)
 
@@ -100,12 +85,26 @@ def preprocess_pdf(filepath):
 
 def get_preprocessed(filepath):
     """
-    Main entry point — handles both images and PDFs.
-    Returns list of processed image paths.
+    For clean digital receipts — skip aggressive preprocessing.
+    Only preprocess if image is actually poor quality.
     """
     ext = os.path.splitext(filepath)[1].lower()
 
     if ext == ".pdf":
         return preprocess_pdf(filepath)
+
+    # Check image quality first
+    img = cv2.imread(filepath)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Calculate blur score — higher = sharper
+    blur_score = cv2.Laplacian(gray, cv2.CV_64F).var()
+    print(f"Image blur score: {blur_score}")
+
+    # If image is already sharp and clean — skip preprocessing
+    if blur_score > 100:
+        print("Clean image detected — skipping preprocessing")
+        return [filepath]  # Use original file directly
     else:
+        print("Poor quality image — applying preprocessing")
         return [preprocess_image(filepath)]

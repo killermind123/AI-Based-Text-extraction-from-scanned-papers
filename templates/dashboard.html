@@ -1,17 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AI Logistics Dashboard</title>
+    <title>Dashboard — AI Extract</title>
     <style>
 :root {
-    --bg: #f7f7f8;
+    --bg: #f4f6fb;
     --bg-card: #ffffff;
-    --sidebar-bg: #111827;
+    --sidebar-bg: #0f172a;
     --sidebar-text: #e5e7eb;
     --sidebar-hover: #1f2937;
-    --text: #1a1a1a;
-    --text-light: #6b6b6b;
+    --text: #111827;
+    --text-light: #6b7280;
     --primary: #4f46e5;
+    --green: #16a34a;
+    --green-bg: #f0fdf4;
+    --green-border: #bbf7d0;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --red-border: #fecaca;
+    --amber: #d97706;
+    --amber-bg: #fffbeb;
     --border: #e5e7eb;
     --radius: 10px;
     --shadow: 0 4px 12px rgba(0,0,0,0.06);
@@ -30,15 +38,13 @@
         --text-light: #a1a1a1;
         --border: #2a2a2d;
         --shadow: 0 4px 16px rgba(0,0,0,0.4);
+        --green-bg: #052e16;
+        --red-bg: #450a0a;
+        --amber-bg: #1c1400;
     }
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: var(--font);
-}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font); }
 
 body {
     background: var(--bg);
@@ -47,7 +53,7 @@ body {
     min-height: 100vh;
 }
 
-/* Sidebar */
+/* ── Sidebar ── */
 .sidebar {
     width: 240px;
     background: var(--sidebar-bg);
@@ -55,176 +61,335 @@ body {
     padding: 30px 20px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 4px;
     position: fixed;
-    top: 0;
-    bottom: 0;
+    top: 0; bottom: 0;
 }
-
 .sidebar h2 {
-    font-size: 22px;
-    margin-bottom: 20px;
-    font-weight: 600;
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 24px;
+    padding-left: 4px;
 }
-
 .sidebar a {
     color: var(--sidebar-text);
     text-decoration: none;
-    padding: 12px 14px;
+    padding: 10px 14px;
     border-radius: var(--radius);
     transition: var(--transition);
-    font-size: 15px;
+    font-size: 14px;
+}
+.sidebar a:hover { background: var(--sidebar-hover); color: white; }
+.sidebar .divider {
+    height: 1px;
+    background: #1f2937;
+    margin: 10px 0;
 }
 
-.sidebar a:hover {
-    background: var(--sidebar-hover);
-}
-
-/* Main */
+/* ── Main ── */
 .main {
     margin-left: 240px;
-    padding: 30px;
+    padding: 32px;
     width: calc(100% - 240px);
 }
 
-/* Navbar */
+/* ── Navbar ── */
 .navbar {
     background: var(--bg-card);
-    padding: 16px 20px;
+    padding: 14px 20px;
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     border: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
-    font-size: 15px;
+    margin-bottom: 28px;
+    font-size: 14px;
+    color: var(--text-light);
+}
+.navbar strong { color: var(--text); }
+
+/* ── Section title ── */
+.section-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text);
 }
 
-h1 {
-    font-size: 26px;
-    margin-bottom: 20px;
-    font-weight: 600;
-}
-
-/* Cards */
-.cards {
+/* ── Stat cards ── */
+.stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
 }
-
-.card {
+.stat-card {
     background: var(--bg-card);
-    padding: 25px;
+    padding: 22px 20px;
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     border: 1px solid var(--border);
     transition: var(--transition);
 }
-
-.card:hover {
-    transform: translateY(-3px);
+.stat-card:hover { transform: translateY(-2px); }
+.stat-label {
+    font-size: 12px;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
 }
-
-.card h3 {
-    font-size: 18px;
-    margin-bottom: 10px;
-    font-weight: 600;
-}
-
-.card p {
-    font-size: 28px;
+.stat-value {
+    font-size: 32px;
     font-weight: 700;
     color: var(--primary);
 }
+.stat-value.green { color: var(--green); }
+.stat-value.red   { color: var(--red); }
+.stat-value.amber { color: var(--amber); }
 
-hr {
-    margin: 40px 0;
+/* ── Quick actions ── */
+.actions-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+}
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: var(--transition);
+    border: none;
+    cursor: pointer;
+}
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: #4338ca; }
+.btn-outline {
+    background: var(--bg-card);
+    color: var(--text);
     border: 1px solid var(--border);
 }
+.btn-outline:hover { background: var(--bg); }
 
-ul {
-    margin-top: 10px;
-    padding-left: 20px;
+/* ── Documents table ── */
+.table-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    overflow: hidden;
 }
+.table-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+thead th {
+    background: var(--bg);
+    padding: 11px 16px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--border);
+}
+tbody td {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: var(--bg); }
+
+.doc-name {
+    font-weight: 500;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.doc-type {
+    font-size: 12px;
+    color: var(--text-light);
+    background: var(--bg);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    display: inline-block;
+}
+
+/* ── Status badges ── */
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.badge-processed {
+    background: var(--green-bg);
+    color: var(--green);
+    border: 1px solid var(--green-border);
+}
+.badge-failed {
+    background: var(--red-bg);
+    color: var(--red);
+    border: 1px solid var(--red-border);
+}
+.badge-processing {
+    background: var(--amber-bg);
+    color: var(--amber);
+    border: 1px solid #fde68a;
+}
+
+/* ── View link ── */
+.view-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+}
+.view-link:hover { text-decoration: underline; }
+
+/* ── Empty state ── */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-light);
+}
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
     <h2>AI Extract</h2>
-    <a href="/dashboard">Dashboard</a>
-    <a href="/upload">Upload Document</a>
-    <a href="/uploaded">Previous Uploads</a>
-    <a href="/profile">Profile</a>
-    <a href="/logout">Logout</a>
+    <a href="/dashboard">📊 Dashboard</a>
+    <a href="/upload">📄 Upload Document</a>
+    <a href="/runsheet">📋 Runsheet Extractor</a>
+    <div class="divider"></div>
+    <a href="/profile">👤 Profile</a>
+    <a href="/logout">🚪 Logout</a>
 </div>
 
 <div class="main">
 
+    <!-- Navbar -->
     <div class="navbar">
-        <div>Welcome, {{ username }}</div>
+        <div>Welcome back, <strong>{{ session['user'] }}</strong></div>
         <div>AI-Based Text Extraction System</div>
     </div>
 
-    <h1>Dashboard Overview</h1>
-
-    <!-- Summary Cards -->
-    <div class="cards">
-        <div class="card">
-            <h3>Total Documents</h3>
-            <p>{{ documents|length }}</p>
+    <!-- Stats -->
+    <div class="section-title">Overview</div>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Documents</div>
+            <div class="stat-value">{{ total_docs }}</div>
         </div>
-
-        <div class="card">
-            <h3>Processed Today</h3>
-            <p>{{ documents|length }}</p>
+        <div class="stat-card">
+            <div class="stat-label">Processed</div>
+            <div class="stat-value green">{{ processed_docs }}</div>
         </div>
-
-        <div class="card">
-            <h3>Extraction Accuracy</h3>
-            <p>--%</p>
+        <div class="stat-card">
+            <div class="stat-label">Failed</div>
+            <div class="stat-value red">{{ failed_docs }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Fields Extracted</div>
+            <div class="stat-value">{{ total_fields }}</div>
         </div>
     </div>
 
-    <hr>
+    <!-- Quick actions -->
+    <div class="actions-row">
+        <a href="/upload" class="btn btn-primary">+ Upload Document</a>
+        <a href="/runsheet" class="btn btn-outline">📋 Process Runsheet</a>
+    </div>
 
-    <!-- Documents Section -->
-    <h2 style="margin-bottom:20px;">Uploaded Documents</h2>
+    <!-- Documents table -->
+    <div class="section-title">Recent Documents</div>
 
-    {% if documents %}
-        {% for doc in documents %}
-            <div class="card" style="margin-bottom:20px;">
-                
-                <h3>{{ doc.file_name }}</h3>
-                <h3>{{ doc.extracted_text }}</h3>
-                <p style="font-size:14px; color:var(--text-light);">
-                    Uploaded: {{ doc.upload_time }}
-                </p>
+    <div class="table-card">
+        <div class="table-header">
+            <span>Last 10 uploads</span>
+        </div>
 
-                <h4 style="margin-top:15px;">Extracted Fields:</h4>
+        {% if documents %}
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Fields</th>
+                    <th>Uploaded</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doc in documents %}
+                <tr>
+                    <td class="doc-name" title="{{ doc.file_name }}">{{ doc.file_name }}</td>
+                    <td>
+                        {% if doc.document_type %}
+                            <span class="doc-type">{{ doc.document_type }}</span>
+                        {% else %}
+                            <span style="color:var(--text-light)">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if doc.processing_status == 'processed' %}
+                            <span class="badge badge-processed">✓ Processed</span>
+                        {% elif doc.processing_status == 'failed' %}
+                            <span class="badge badge-failed">✗ Failed</span>
+                        {% else %}
+                            <span class="badge badge-processing">⏳ Processing</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ doc.field_count }}</td>
+                    <td style="color:var(--text-light)">
+                        {% if doc.upload_time %}
+                            {{ doc.upload_time.strftime('%d %b %Y') if doc.upload_time is not string else doc.upload_time[:10] }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="/uploaded/{{ doc.id }}" class="view-link">View →</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-                {% if doc.fields %}
-                    <ul>
-                        {% for field in doc.fields %}
-                            <li>
-                                <strong>{{ field.field_name }}</strong>:
-                                {{ field.field_value }}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p style="font-size:14px; color:var(--text-light);">
-                        No fields extracted.
-                    </p>
-                {% endif %}
+        {% else %}
+        <div class="empty-state">
+            <div class="icon">📂</div>
+            <p>No documents uploaded yet.</p>
+            <a href="/upload" class="btn btn-primary">Upload your first document</a>
+        </div>
+        {% endif %}
 
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>No documents uploaded yet.</p>
-    {% endif %}
+    </div>
 
 </div>
 

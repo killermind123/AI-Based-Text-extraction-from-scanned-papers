@@ -1,35 +1,41 @@
 from flask import Blueprint, render_template, request, redirect, session
-from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.utils import secure_filename
-from database import init_db, get_connection
-import pytesseract
-from PIL import Image
-import os
-import re
+from werkzeug.security import generate_password_hash
+from database import get_connection, execute
 
 signup_bp = Blueprint("signup", __name__)
 
-#signup route
-@signup_bp.route("/signup", methods=["GET", "POST"])
+@signup_bp.route("/signup", methods=["GET"])
+def signup_page():
+    if "user" in session:
+        return redirect("/")
+    return render_template("signup.html")
+
+@signup_bp.route("/signup", methods=["POST"])
 def signup():
-    if request.method == "POST":
-        username = request.form["username"]
-        password = generate_password_hash(request.form["password"])
+    username = request.form.get("username", "").strip()
+    password = request.form.get("password", "").strip()
 
-        conn = get_connection()
-        cursor = conn.cursor()
+    if not username or not password:
+        return render_template("signup.html", error="Please fill in all fields")
 
-        try:
-            cursor.execute(
-                "INSERT INTO users (username, password) VALUES (?, ?)",
-                (username, password)
-            )
-            conn.commit()
-        except:
-            conn.close()
-            return "Username already exists"
+    if len(password) < 6:
+        return render_template("signup.html", error="Password must be at least 6 characters")
 
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        execute(cursor, """
+            INSERT INTO users (username, password)
+            VALUES (%s, %s)
+        """, (username, generate_password_hash(password)))
+        conn.commit()
+        cursor.close()
         conn.close()
         return redirect("/login")
 
-    return render_template("signup.html")
+    except Exception as e:
+        conn.rollback()
+        cursor.close()
+        conn.close()
+        return render_template("signup.html", error=f"Error: {str(e)}")

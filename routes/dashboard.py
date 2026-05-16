@@ -1,57 +1,67 @@
-from flask import Blueprint, render_template, request, redirect, session
-from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.utils import secure_filename
-from database import init_db, get_connection
-import pytesseract
-from PIL import Image
-import os
-import re
+from flask import Blueprint, render_template, session, redirect
+from database import get_connection, execute, fetchone, fetchall
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
-#dashboard route
 @dashboard_bp.route("/dashboard")
 def dashboard():
     if "user" not in session:
-        return redirect("/login")
+        return render_template("dashboard.html")
 
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Get user ID
-    cursor.execute("SELECT id FROM users WHERE username=?", (session["user"],))
-    user = cursor.fetchone()
+    execute(cursor, "SELECT id FROM users WHERE username = %s", (session["user"],))
+    user = fetchone(cursor)
 
-    documents = []
+    if not user:
+        cursor.close()
+        conn.close()
+        return redirect("/login")
 
-    if user:
-        cursor.execute("""
-            SELECT * FROM documents
-            WHERE user_id = ?
-            ORDER BY upload_time DESC
-        """, (user["id"],))
+    user_id = user["id"]
 
-        docs = cursor.fetchall()
+    execute(cursor, "SELECT COUNT(*) as total FROM documents WHERE user_id = %s", (user_id,))
+    total_docs = fetchone(cursor)["total"]
 
-        for doc in docs:
-            # Convert sqlite3.Row → dictionary
-            doc_dict = dict(doc)
+    execute(cursor, """
+        SELECT COUNT(*) as total FROM documents
+        WHERE user_id = %s AND processing_status = 'processed'
+    """, (user_id,))
+    processed_docs = fetchone(cursor)["total"]
 
-            # Fetch extracted fields
-            cursor.execute("""
-                SELECT field_name, field_value
-                FROM extracted_fields
-                WHERE document_id = ?
-            """, (doc["id"],))
+    execute(cursor, """
+        SELECT COUNT(*) as total FROM documents
+        WHERE user_id = %s AND processing_status = 'failed'
+    """, (user_id,))
+    failed_docs = fetchone(cursor)["total"]
 
-            doc_dict["fields"] = cursor.fetchall()
+    execute(cursor, """
+        SELECT COUNT(*) as total FROM extracted_fields ef
+        JOIN documents d ON ef.document_id = d.id
+        WHERE d.user_id = %s
+    """, (user_id,))
+    total_fields = fetchone(cursor)["total"]
 
-            documents.append(doc_dict)
+    execute(cursor, """
+        SELECT d.id, d.file_name, d.upload_time,
+               d.processing_status, d.document_type,
+               COUNT(ef.id) as field_count
+        FROM documents d
+        LEFT JOIN extracted_fields ef ON d.id = ef.document_id
+        WHERE d.user_id = %s
+        GROUP BY d.id
+        ORDER BY d.upload_time DESC
+        LIMIT 10
+    """, (user_id,))
+    documents = fetchall(cursor)
 
+    cursor.close()
     conn.close()
 
-    return render_template(
-        "dashboard.html",
-        documents=documents,
-        username=session["user"]
-    )
+    return render_template("dashboard.html",
+                           total_docs=total_docs,
+                           processed_docs=processed_docs,
+                           failed_docs=failed_docs,
+                           total_fields=total_fields,
+                           documents=documents)

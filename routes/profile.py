@@ -1,8 +1,42 @@
 from flask import Blueprint, render_template, request, redirect, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from database import get_connection
+from database import get_connection, execute, fetchone, fetchall
 
 profile_bp = Blueprint("profile", __name__)
+
+
+def get_profile_data(cursor, user_id):
+    execute(cursor, """
+        SELECT COUNT(*) as total FROM documents WHERE user_id = %s
+    """, (user_id,))
+    total_docs = fetchone(cursor)["total"]
+
+    execute(cursor, """
+        SELECT COUNT(*) as total FROM documents
+        WHERE user_id = %s AND processing_status = 'processed'
+    """, (user_id,))
+    processed_docs = fetchone(cursor)["total"]
+
+    execute(cursor, """
+        SELECT COUNT(*) as total FROM documents
+        WHERE user_id = %s AND processing_status = 'failed'
+    """, (user_id,))
+    failed_docs = fetchone(cursor)["total"]
+
+    execute(cursor, """
+        SELECT d.id, d.file_name, d.upload_time,
+               d.processing_status, d.document_type,
+               COUNT(ef.id) as field_count
+        FROM documents d
+        LEFT JOIN extracted_fields ef ON d.id = ef.document_id
+        WHERE d.user_id = %s
+        GROUP BY d.id
+        ORDER BY d.upload_time DESC
+        LIMIT 10
+    """, (user_id,))
+    documents = fetchall(cursor)
+
+    return total_docs, processed_docs, failed_docs, documents
 
 
 @profile_bp.route("/profile", methods=["GET"])
@@ -13,58 +47,30 @@ def profile_page():
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Get user details
-    cursor.execute("""
-        SELECT id, username, email, created_at 
-        FROM users WHERE username = ?
+    execute(cursor, """
+        SELECT id, username, email, created_at
+        FROM users WHERE username = %s
     """, (session["user"],))
-    user = cursor.fetchone()
+    user = fetchone(cursor)
 
     if not user:
+        cursor.close()
         conn.close()
         return redirect("/login")
 
-    # Get document statistics
-    cursor.execute("""
-        SELECT COUNT(*) as total FROM documents 
-        WHERE user_id = ?
-    """, (user["id"],))
-    total_docs = cursor.fetchone()["total"]
+    total_docs, processed_docs, failed_docs, documents = get_profile_data(
+        cursor, user["id"]
+    )
 
-    cursor.execute("""
-        SELECT COUNT(*) as total FROM documents 
-        WHERE user_id = ? AND processing_status = 'processed'
-    """, (user["id"],))
-    processed_docs = cursor.fetchone()["total"]
-
-    cursor.execute("""
-        SELECT COUNT(*) as total FROM documents 
-        WHERE user_id = ? AND processing_status = 'failed'
-    """, (user["id"],))
-    failed_docs = cursor.fetchone()["total"]
-
-    # Get recent documents
-    cursor.execute("""
-        SELECT d.id, d.file_name, d.upload_time, 
-               d.processing_status, d.document_type,
-               COUNT(ef.id) as field_count
-        FROM documents d
-        LEFT JOIN extracted_fields ef ON d.id = ef.document_id
-        WHERE d.user_id = ?
-        GROUP BY d.id
-        ORDER BY d.upload_time DESC
-        LIMIT 10
-    """, (user["id"],))
-    documents = cursor.fetchall()
-
+    cursor.close()
     conn.close()
 
     return render_template("profile.html",
-                         user=user,
-                         total_docs=total_docs,
-                         processed_docs=processed_docs,
-                         failed_docs=failed_docs,
-                         documents=documents)
+                           user=user,
+                           total_docs=total_docs,
+                           processed_docs=processed_docs,
+                           failed_docs=failed_docs,
+                           documents=documents)
 
 
 @profile_bp.route("/profile/update", methods=["POST"])
@@ -81,40 +87,36 @@ def update_profile():
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT * FROM users WHERE username = ?
-    """, (session["user"],))
-    user = cursor.fetchone()
+    execute(cursor, "SELECT * FROM users WHERE username = %s", (session["user"],))
+    user = fetchone(cursor)
 
     if not user:
+        cursor.close()
         conn.close()
         return redirect("/login")
 
     errors = []
     success = []
 
-    # Update username and email
     if new_username and new_username != user["username"]:
-        # Check if username already taken
-        cursor.execute("""
-            SELECT id FROM users WHERE username = ? AND id != ?
+        execute(cursor, """
+            SELECT id FROM users WHERE username = %s AND id != %s
         """, (new_username, user["id"]))
-        if cursor.fetchone():
+        if fetchone(cursor):
             errors.append("Username already taken")
         else:
-            cursor.execute("""
-                UPDATE users SET username = ? WHERE id = ?
+            execute(cursor, """
+                UPDATE users SET username = %s WHERE id = %s
             """, (new_username, user["id"]))
             session["user"] = new_username
             success.append("Username updated successfully")
 
     if new_email and new_email != user["email"]:
-        cursor.execute("""
-            UPDATE users SET email = ? WHERE id = ?
+        execute(cursor, """
+            UPDATE users SET email = %s WHERE id = %s
         """, (new_email, user["id"]))
         success.append("Email updated successfully")
 
-    # Update password
     if current_password or new_password or confirm_password:
         if not check_password_hash(user["password"], current_password):
             errors.append("Current password is incorrect")
@@ -123,57 +125,30 @@ def update_profile():
         elif len(new_password) < 6:
             errors.append("Password must be at least 6 characters")
         else:
-            cursor.execute("""
-                UPDATE users SET password = ? WHERE id = ?
+            execute(cursor, """
+                UPDATE users SET password = %s WHERE id = %s
             """, (generate_password_hash(new_password), user["id"]))
             success.append("Password updated successfully")
 
     conn.commit()
 
-    # Refresh user data
-    cursor.execute("""
-        SELECT id, username, email, created_at 
-        FROM users WHERE id = ?
+    execute(cursor, """
+        SELECT id, username, email, created_at FROM users WHERE id = %s
     """, (user["id"],))
-    updated_user = cursor.fetchone()
+    updated_user = fetchone(cursor)
 
-    cursor.execute("""
-        SELECT COUNT(*) as total FROM documents WHERE user_id = ?
-    """, (user["id"],))
-    total_docs = cursor.fetchone()["total"]
+    total_docs, processed_docs, failed_docs, documents = get_profile_data(
+        cursor, updated_user["id"]
+    )
 
-    cursor.execute("""
-        SELECT COUNT(*) as total FROM documents 
-        WHERE user_id = ? AND processing_status = 'processed'
-    """, (user["id"],))
-    processed_docs = cursor.fetchone()["total"]
-
-    cursor.execute("""
-        SELECT COUNT(*) as total FROM documents 
-        WHERE user_id = ? AND processing_status = 'failed'
-    """, (user["id"],))
-    failed_docs = cursor.fetchone()["total"]
-
-    cursor.execute("""
-        SELECT d.id, d.file_name, d.upload_time,
-               d.processing_status, d.document_type,
-               COUNT(ef.id) as field_count
-        FROM documents d
-        LEFT JOIN extracted_fields ef ON d.id = ef.document_id
-        WHERE d.user_id = ?
-        GROUP BY d.id
-        ORDER BY d.upload_time DESC
-        LIMIT 10
-    """, (user["id"],))
-    documents = cursor.fetchall()
-
+    cursor.close()
     conn.close()
 
     return render_template("profile.html",
-                         user=updated_user,
-                         total_docs=total_docs,
-                         processed_docs=processed_docs,
-                         failed_docs=failed_docs,
-                         documents=documents,
-                         errors=errors,
-                         success=success)
+                           user=updated_user,
+                           total_docs=total_docs,
+                           processed_docs=processed_docs,
+                           failed_docs=failed_docs,
+                           documents=documents,
+                           errors=errors,
+                           success=success)

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Runsheet Upload — AI Extract</title>
+    <style>
+        :root {
+            --bg: #f4f6fb;
+            --bg-card: #ffffff;
+            --sidebar-bg: #0f172a;
+            --text: #111827;
+            --text-light: #6b7280;
+            --primary: #2563eb;
+            --primary-hover: #1e40af;
+            --border: #e5e7eb;
+            --radius: 14px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+            color: var(--text);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 240px;
+            background: var(--sidebar-bg);
+            color: #e5e7eb;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: fixed;
+            top: 0; bottom: 0;
+        }
+        .sidebar h2 { font-size: 20px; margin-bottom: 24px; font-weight: 700; color: white; }
+        .sidebar a {
+            text-decoration: none;
+            color: #cbd5e1;
+            padding: 10px 14px;
+            border-radius: 8px;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+        .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,0.08); color: white; }
+
+        /* ── Main ── */
+        .main {
+            margin-left: 240px;
+            padding: 40px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .page-header {
+            width: 100%;
+            max-width: 560px;
+            margin-bottom: 32px;
+        }
+        .page-header h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+        .page-header p  { color: var(--text-light); font-size: 14px; }
+
+        /* ── Card ── */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            padding: 36px 32px;
+            width: 100%;
+            max-width: 560px;
+        }
+
+        /* ── Error ── */
+        .error-msg {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        /* ── Drop zone ── */
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 48px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #f9fafb;
+            margin-bottom: 20px;
+        }
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+        .drop-zone .icon { font-size: 40px; margin-bottom: 12px; }
+        .drop-zone p { color: var(--text-light); font-size: 14px; margin-top: 4px; }
+        .drop-zone strong { color: var(--primary); }
+        .drop-zone .file-name {
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .file-types {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 8px;
+            letter-spacing: 0.05em;
+        }
+        input[type="file"] { display: none; }
+
+        /* ── Info box ── */
+        .info-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 13px;
+            color: #1e40af;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .info-box strong { display: block; margin-bottom: 4px; }
+
+        /* ── Button ── */
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover { background: var(--primary-hover); }
+        button:disabled { background: #93c5fd; cursor: not-allowed; }
+
+        /* ── Loading ── */
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 18px;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        .loading.show { display: flex; }
+        .spinner {
+            width: 18px; height: 18px;
+            border: 2px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            font-size: 14px;
+            color: var(--primary);
+            text-decoration: none;
+            text-align: center;
+            width: 100%;
+        }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>AI Extract</h2>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/upload">Upload Document</a>
+    <a href="/runsheet" class="active">Runsheet Extractor</a>
+    <a href="/profile">Profile</a>
+    <a href="/logout">Logout</a>
+</div>
+
+<div class="main">
+    <div class="page-header">
+        <h1>Runsheet Extractor</h1>
+        <p>Upload a scanned delivery runsheet to extract order IDs, names and signatures automatically.</p>
+    </div>
+
+    <div class="card">
+
+        {% if error %}
+        <div class="error-msg">{{ error }}</div>
+        {% endif %}
+
+        <div class="info-box">
+            <strong>What this extracts:</strong>
+            Each order block is detected automatically. For each order found, you'll get a cropped signature image and a text file named <em>ID --- Name</em>. Orders with no name or signature are skipped.
+        </div>
+
+        <form action="/runsheet" method="POST" enctype="multipart/form-data"
+              id="runsheet-form" onsubmit="handleSubmit()">
+
+            <div class="drop-zone" id="drop-zone"
+                 onclick="document.getElementById('file-input').click()">
+                <div class="icon">📋</div>
+                <p>Drag & drop your runsheet here</p>
+                <p>or <strong>click to browse</strong></p>
+                <div class="file-name" id="file-name"></div>
+                <div class="file-types">PNG · JPG · PDF · TIFF</div>
+            </div>
+
+            <input type="file" id="file-input" name="file"
+                   accept=".png,.jpg,.jpeg,.pdf,.tiff"
+                   onchange="updateFileName(this)" required>
+
+            <button type="submit" id="submit-btn">Extract Orders</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <span>Detecting order blocks and extracting signatures...</span>
+        </div>
+
+        <a href="/dashboard" class="back-link">Back to Dashboard</a>
+    </div>
+</div>
+
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+
+    function updateFileName(input) {
+        const name = input.files[0]?.name || '';
+        document.getElementById('file-name').textContent = name ? `Selected: ${name}` : '';
+    }
+
+    dropZone.addEventListener('dragover', e => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            updateFileName(fileInput);
+        }
+    });
+
+    function handleSubmit() {
+        document.getElementById('submit-btn').disabled = true;
+        document.getElementById('submit-btn').textContent = 'Processing...';
+        document.getElementById('loading').classList.add('show');
+    }
+</script>
+
+</body>
+</html>

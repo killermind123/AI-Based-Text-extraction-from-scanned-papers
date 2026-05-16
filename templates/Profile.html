@@ -297,7 +297,7 @@
             <h2>{{ user['username'] }}</h2>
             <p class="email">{{ user['email'] or 'No email set' }}</p>
             <div class="joined">
-                Joined {{ user['created_at'][:10] if user['created_at'] else 'Unknown' }}
+                Joined {% if user['created_at'] %}{{ user['created_at'].strftime('%Y-%m-%d') if user['created_at'].__class__.__name__ == 'datetime' else user['created_at'][:10] }}{% else %}Unknown{% endif %}
             </div>
 
             <!-- Stats -->
@@ -321,14 +321,12 @@
         <div class="card">
             <div class="section-title">Edit Profile</div>
 
-            <!-- Success messages -->
             {% if success %}
                 {% for msg in success %}
                 <div class="alert alert-success">✓ {{ msg }}</div>
                 {% endfor %}
             {% endif %}
 
-            <!-- Error messages -->
             {% if errors %}
                 {% for err in errors %}
                 <div class="alert alert-error">✗ {{ err }}</div>
@@ -423,7 +421,9 @@
                             </span>
                         </td>
                         <td style="color:#94a3b8; font-size:13px">
-                            {{ doc['upload_time'][:10] if doc['upload_time'] else '—' }}
+                            {% if doc['upload_time'] %}
+                                {{ doc['upload_time'].strftime('%Y-%m-%d') if doc['upload_time'].__class__.__name__ == 'datetime' else doc['upload_time'][:10] }}
+                            {% else %}—{% endif %}
                         </td>
                         <td>
                             <a href="/uploaded/{{ doc['id'] }}"
